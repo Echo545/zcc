@@ -1,15 +1,28 @@
 <script>
   import { onMount } from "svelte";
   import ListEntry from "./ListEntry.svelte";
+  import TicketModal from "./TicketModal.svelte";
+  import modalDetails from "./ListEntry.svelte";
 
   const PAGE_COUNT = 25;
+
+  // start_Ticket += page_count with each page turn forward
+  let start_ticket = 1;
+
+  //   current_page += 1 with every page turn forward and -= 1 for each backwards
+  let current_page = 1;
   let tickets_url = `https://zcccodingchallenge54.zendesk.com/api/v2/tickets?page[size]=${PAGE_COUNT}`;
+  let count_url =
+    "https://zcccodingchallenge54.zendesk.com/api/v2/tickets/count";
 
   export let key;
+
+  $: ticketPackage = modalDetails;
 
   let result = [];
   let error = null;
   let tickets = null;
+  let ticketCount = null;
 
   var headers = new Headers();
   headers.append("Authorization", "Bearer " + key);
@@ -22,42 +35,47 @@
 
   onMount(async () => {
     try {
-      const response = await fetch(tickets_url, requestOptions);
+      let response = await fetch(tickets_url, requestOptions);
       result = await response.json();
       tickets = result.tickets;
-    } catch (e) {
-      error = e;
-      //   console.log(e);
+
+      response = await fetch(count_url, requestOptions);
+      result = await response.json();
+      ticketCount = result.count.value;
+    } catch (err) {
+      error = err;
+      console.log(err);
     }
   });
 
-function listEntryPackage(ticket) {
-	return {
-		subject: ticket.subject,
-		requester_id: ticket.requester_id,
-		created_at: ticket.created_at,
-		priority: ticket.priority,
-		updated_at: ticket.updated_at,
-		status: ticket.status,
-	};
-  };
-  //   function getPage(url, key) {
-  //     let result = [];
+  function ticketDetailsPackage(ticket) {
+    return {
+      subject: ticket.subject,
+      requester_id: ticket.requester_id,
+      created_at: ticket.created_at,
+      priority: ticket.priority,
+      updated_at: ticket.updated_at,
+      status: ticket.status,
+      id: ticket.id,
+      description: ticket.description,
+      tags: ticket.tags,
+      follower_ids: ticket.follower_ids,
+      assignee_id: ticket.assignee_id,
+      submitter_id: ticket.submitter_id,
+    };
 
-  //     var headers = new Headers();
-  //     headers.append("Authorization", "Bearer " + key);
-
-  //     var requestOptions = {
-  //       method: "GET",
-  //       headers: headers,
-  //       redirect: "follow",
-  //     };
-
-  //     return fetch(url, requestOptions);
-  //   }
-
-  //   let r = getPage(tickets_url, key);
-  //   let abc;
+    function listEntryPackage(ticket) {
+      return {
+        subject: ticket.subject,
+        requester_id: ticket.requester_id,
+        created_at: ticket.created_at,
+        priority: ticket.priority,
+        updated_at: ticket.updated_at,
+        status: ticket.status,
+        id: ticket.id,
+      };
+    }
+  }
 </script>
 
 <!-- <main> -->
@@ -103,12 +121,12 @@ function listEntryPackage(ticket) {
                   <tbody>
                     {#if tickets}
                       {#each tickets as ticket}
-                        <ListEntry {...listEntryPackage(ticket)} />
+                        <ListEntry {...ticketDetailsPackage(ticket)} />
                       {:else}
-                        <p>loading</p>
+                        <p>loading...</p>
                       {/each}
                     {:else}
-                      API Unavailable
+						<p>loading...</p>
                     {/if}
                   </tbody>
                   <tfoot>
@@ -123,9 +141,9 @@ function listEntryPackage(ticket) {
                   </tfoot>
                 </table>
               </div>
-              <div class="row d-xl-flex justify-content-xl-center">
+              <div class="row d-flex justify-content-center">
                 <div
-                  class="col-xl-4 d-xl-flex justify-content-xl-end align-items-xl-center"
+                  class="col-4 d-flex justify-content-end align-items-center"
                 >
                   <button class="btn btn-primary" type="button">
                     <svg
@@ -145,14 +163,21 @@ function listEntryPackage(ticket) {
                   >
                 </div>
                 <div
-                  class="col-xl-2 d-xl-flex justify-content-xl-center align-items-xl-center"
+                  class="col-2 d-flex justify-content-center align-items-center"
                 >
-                  <p class="lead text-secondary d-xl-flex">
-                    Displaying 1-25 of 100
+                  <p class="text-secondary">
+                    Displaying {start_ticket}-{current_page * PAGE_COUNT} of
+
+                    <!-- Total number of tickets -->
+                    {#if ticketCount}
+                      {ticketCount}
+                    {:else}
+                      <i>loading...</i>
+                    {/if}
                   </p>
                 </div>
                 <div
-                  class="col-xl-4 d-xl-flex justify-content-xl-start align-items-xl-center"
+                  class="col-4 d-flex justify-content-start align-items-center"
                 >
                   <button class="btn btn-primary" type="button"
                     >Next Page
@@ -175,6 +200,7 @@ function listEntryPackage(ticket) {
                 </div>
               </div>
             </div>
+
           {:else}
             <h4 id="error-message">
               Sorry, the API is currently unavailable
@@ -191,64 +217,13 @@ function listEntryPackage(ticket) {
     </footer>
   </div>
 </div>
-<!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script> -->
-<!-- <script src="assets/js/bs-init.js"></script> -->
-<!-- <script src="assets/js/theme.js"></script> -->
 
-<!-- {#await r}
-    Loading, please wait...
-  {:then results}
-	  {console.log(r)}
-	  Results: {console.log(results)}
-
-	  {abc = results.json()}
-	  {abc}
-
-	  {#await results.json()}
-	  	Loading tickets into JSON
-  		{:then tickets}
-
-
-		{:catch error}
-		  Something went wrong: {error.message}
-		{/await} -->
-
-<!-- {#each tickets as ticket}
-      <p>
-        {#if ticket.status == "open"}
-          O:
-        {:else if (ticket.status = "closed")}
-          C:
-        {:else if (ticket.status = "pending")}
-          P:
-        {:else if (ticket.status = "new")}
-          N:
-        {:else}
-          S:
-        {/if}
-
-        <a href={ticket.url}> {ticket.id} : {ticket.subject}</a>
-      </p>
-    {/each} -->
-<!-- {:catch error}
-    Something went wrong: {error.message}
-  {/await} -->
-
-<!-- <Request url="{tickets_url}," token={key} /> -->
-
-<!-- </main> -->
 <style>
   h1 {
     color: #ff3e00;
     text-transform: uppercase;
     /* font-size: 4em; */
     font-weight: 100;
-  }
-
-  @media (min-width: 640px) {
-    main {
-      max-width: none;
-    }
   }
 
   #error-message {

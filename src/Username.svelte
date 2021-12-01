@@ -35,5 +35,5 @@
 {:else if invalid_user}
   N/A
 {:else}
-  ...
+  <i>loading...</i>
 {/if}
