@@ -1,8 +1,15 @@
 <script>
-  import { onMount } from "svelte";
+  import { current_ticket } from "./stores.js";
+  import { global_tickets } from "./stores.js";
+  import { next_page_url } from "./stores";
+  import { has_more } from "./stores";
+  import { ticket_count } from "./stores.js";
+  import {load_error} from "./stores";
+
+  import { LoadTickets } from "./RequestTickets.js";
+
   import ListEntry from "./ListEntry.svelte";
   import TicketModal from "./TicketModal.svelte";
-  import modalDetails from "./ListEntry.svelte";
 
   const PAGE_COUNT = 25;
 
@@ -12,73 +19,24 @@
   //   current_page += 1 with every page turn forward and -= 1 for each backwards
   let current_page = 1;
   let tickets_url = `https://zcccodingchallenge54.zendesk.com/api/v2/tickets?page[size]=${PAGE_COUNT}`;
-  let count_url =
-    "https://zcccodingchallenge54.zendesk.com/api/v2/tickets/count";
 
   export let key;
 
-  $: ticketPackage = modalDetails;
-
-  let result = [];
-  let error = null;
-  let tickets = null;
-  let ticketCount = null;
-
+  let backButtonStatus = "disabled";
   var headers = new Headers();
   headers.append("Authorization", "Bearer " + key);
 
-  var requestOptions = {
-    method: "GET",
-    headers: headers,
-    redirect: "follow",
-  };
+  LoadTickets(tickets_url);
 
-  onMount(async () => {
-    try {
-      let response = await fetch(tickets_url, requestOptions);
-      result = await response.json();
-      tickets = result.tickets;
+  function checkNextPage() {}
 
-      response = await fetch(count_url, requestOptions);
-      result = await response.json();
-      ticketCount = result.count.value;
-    } catch (err) {
-      error = err;
-      console.log(err);
-    }
-  });
-
-  function ticketDetailsPackage(ticket) {
-    return {
-      subject: ticket.subject,
-      requester_id: ticket.requester_id,
-      created_at: ticket.created_at,
-      priority: ticket.priority,
-      updated_at: ticket.updated_at,
-      status: ticket.status,
-      id: ticket.id,
-      description: ticket.description,
-      tags: ticket.tags,
-      follower_ids: ticket.follower_ids,
-      assignee_id: ticket.assignee_id,
-      submitter_id: ticket.submitter_id,
-    };
-
-    function listEntryPackage(ticket) {
-      return {
-        subject: ticket.subject,
-        requester_id: ticket.requester_id,
-        created_at: ticket.created_at,
-        priority: ticket.priority,
-        updated_at: ticket.updated_at,
-        status: ticket.status,
-        id: ticket.id,
-      };
-    }
+  function nextPage() {
+    current_page += 1;
+    LoadTickets($next_page_url);
   }
+
 </script>
 
-<!-- <main> -->
 <div id="wrapper">
   <div class="d-flex flex-column" id="content-wrapper">
     <div id="content">
@@ -93,13 +51,13 @@
       <div class="container-fluid">
         <div class="card shadow">
           <div class="card-header py-3">
-            {#if !error}
+            {#if !$load_error}
               <p class="text-primary m-0 fw-bold">All Tickets</p>
             {:else}
               <h3>😢</h3>
             {/if}
           </div>
-          {#if !error}
+          {#if !$load_error}
             <div class="card-body">
               <div
                 class="table-responsive table mt-2"
@@ -119,14 +77,14 @@
                     </tr>
                   </thead>
                   <tbody>
-                    {#if tickets}
-                      {#each tickets as ticket}
-                        <ListEntry {...ticketDetailsPackage(ticket)} />
+                    {#if $global_tickets}
+                      {#each $global_tickets as ticket}
+                        <ListEntry {ticket} />
                       {:else}
                         <p>loading...</p>
                       {/each}
                     {:else}
-						<p>loading...</p>
+                      <p>loading...</p>
                     {/if}
                   </tbody>
                   <tfoot>
@@ -145,7 +103,11 @@
                 <div
                   class="col-4 d-flex justify-content-end align-items-center"
                 >
-                  <button class="btn btn-primary" type="button">
+                  <button
+                    class="btn btn-primary {backButtonStatus}"
+                    type="button"
+                    id="back-button"
+                  >
                     <svg
                       width="1em"
                       height="1em"
@@ -169,8 +131,8 @@
                     Displaying {start_ticket}-{current_page * PAGE_COUNT} of
 
                     <!-- Total number of tickets -->
-                    {#if ticketCount}
-                      {ticketCount}
+                    {#if $ticket_count}
+                      {$ticket_count}
                     {:else}
                       <i>loading...</i>
                     {/if}
@@ -179,7 +141,10 @@
                 <div
                   class="col-4 d-flex justify-content-start align-items-center"
                 >
-                  <button class="btn btn-primary" type="button"
+                  <button
+                    class="btn btn-primary"
+                    type="button"
+                    on:click={nextPage}
                     >Next Page
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -200,7 +165,6 @@
                 </div>
               </div>
             </div>
-
           {:else}
             <h4 id="error-message">
               Sorry, the API is currently unavailable
@@ -216,13 +180,16 @@
       </div>
     </footer>
   </div>
+
+  {#if $current_ticket}
+    <TicketModal />
+  {/if}
 </div>
 
 <style>
   h1 {
     color: #ff3e00;
     text-transform: uppercase;
-    /* font-size: 4em; */
     font-weight: 100;
   }
 
