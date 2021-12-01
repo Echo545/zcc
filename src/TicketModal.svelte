@@ -7,6 +7,7 @@
   import IconClosed from "./IconClosed.svelte";
   import IconNew from "./IconNew.svelte";
   import Username from "./Username.svelte";
+  import Comment from "./Comment.svelte";
 
   $: id = $current_ticket.id;
   $: subject = $current_ticket.subject;
@@ -107,20 +108,14 @@
             <h5>Comments</h5>
             <hr class="comment-hr" />
             <div id="comment-organizer">
+
               <!-- TODO: comments -->
 
-              <div class="comment">
-                <h5>Evan Richards</h5>
-                <div class="comment-body">
-                  <h6>11/26/21 5:30pm</h6>
-                  <p>
-                    This is a serious problem and we must work quickly to
-                    resolve it. What ever will we do?! This is a serious problem
-                    and we must work quickly to resolve it. What ever will we
-                    do?
-                  </p>
-                </div>
-              </div>
+            <!-- If this ticket has comments -->
+                    <!-- Loop through each, creating package for each and passing into comment -->
+                    <!-- <Comment/> -->
+            <!-- Else: elegently handle no comments -->
+
             </div>
           </div>
         </div>
