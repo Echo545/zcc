@@ -1,5 +1,6 @@
 <script>
   import { current_ticket } from "./stores.js";
+  import { LoadComments } from "./Requests";
 
   import IconOpen from "./IconOpen.svelte";
   import IconPending from "./IconPending.svelte";
@@ -21,6 +22,8 @@
   $: follower_ids = $current_ticket.follower_ids;
   $: assignee_id = $current_ticket.assignee_id;
   $: submitter_id = $current_ticket.submitter_id;
+
+  $: comments_promise = LoadComments(id);
 </script>
 
 {#if $current_ticket}
@@ -45,7 +48,7 @@
             {:else}
               <IconClosed />
             {/if}
-            Subject: {subject}
+            #{id}: {subject}
           </h3>
 
           {#if priority}
@@ -76,12 +79,18 @@
                 </div>
                 <div class="col" id="meta-col">
                   <div class="ticket-details">
-                    <p>Submitter: <Username requester_id={submitter_id} /></p>
-
-                    <p>Assignee: <Username requester_id={assignee_id} /></p>
+                    <p>
+                      <b>Submitter:</b>
+                      <Username requester_id={submitter_id} />
+                    </p>
 
                     <p>
-                      Followers:
+                      <b>Assignee:</b>
+                      <Username requester_id={assignee_id} />
+                    </p>
+
+                    <p>
+                      <b>Followers:</b>
                       {#if follower_ids}
                         {#each follower_ids as f_id}
                           <Username {f_id} />,
@@ -90,7 +99,7 @@
                     </p>
 
                     <p>
-                      Tags:
+                      <b>Tags:</b>
                       {#if tags}
                         {#each tags as tag}
                           {tag},
@@ -99,8 +108,8 @@
                     </p>
 
                     <!-- TODO: make these dates readable -->
-                    <p>Created: {created_at}</p>
-                    <p>Updated: {updated_at}</p>
+                    <p><b>Created:</b> {created_at}</p>
+                    <p><b>Updated:</b> {updated_at}</p>
                   </div>
                 </div>
               </div>
@@ -109,13 +118,34 @@
             <hr class="comment-hr" />
             <div id="comment-organizer">
 
-              <!-- TODO: comments -->
+            <!-- Load comments for ticket -->
+              {#await comments_promise}
+                <i>Loading...</i>
+              {:then comments}
+                {#if comments}
 
-            <!-- If this ticket has comments -->
-                    <!-- Loop through each, creating package for each and passing into comment -->
-                    <!-- <Comment/> -->
-            <!-- Else: elegently handle no comments -->
+                <!-- If there's more than one comment, display each -->
+                  {#if Array.isArray(comments)}
+                    {#each comments as comment}
+                      <Comment
+                        author_id={comment.author_id}
+                        plain_body={comment.plain_body}
+                        public_comment={comment.public}
+                        created_at={comment.created_at}
+                      />
+                    {/each}
 
+                    <!-- If there's only 1 comment display it -->
+                  {:else}
+                    <Comment
+                      author_id={comments.author_id}
+                      plain_body={comments.plain_body}
+                      public_comment={comments.public}
+                      created_at={comments.created_at}
+                    />
+                  {/if}
+                {/if}
+              {/await}
             </div>
           </div>
         </div>

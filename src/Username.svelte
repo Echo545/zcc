@@ -1,13 +1,12 @@
 <script>
   import auth from "../Auth.js";
-  import { onMount } from "svelte";
+  import { names_cache } from "./stores";
 
   export let requester_id;
-  const user_url = `https://zcccodingchallenge54.zendesk.com/api/v2/users/${requester_id}/identities`;
+
+  const user_url = `https://zcccodingchallenge54.zendesk.com/api/v2/users/${requester_id}`;
 
   let result = [];
-  let user_data = null;
-  let invalid_user = false;
 
   var headers = new Headers();
   headers.append("Authorization", "Bearer " + auth.token);
@@ -18,22 +17,36 @@
     redirect: "follow",
   };
 
-  onMount(async () => {
-    try {
-      const response = await fetch(user_url, requestOptions);
-      result = await response.json();
-      user_data = result.identities[0];
-    } catch (error) {
-      invalid_user = true;
-      console.log(error);
-    }
-  });
+  async function loadName() {
+
+    // Attempt to load name from cache first
+    let name = $names_cache.get(requester_id);
+
+      try {
+        if (!name) {
+
+            const response = await fetch(user_url, requestOptions);
+            result = await response.json();
+
+            name = result.user.name;
+
+            // Cache name
+            $names_cache = $names_cache.set(requester_id, name);
+        }
+
+      } catch (error) {
+        console.log(error);
+      }
+
+    return name;
+  }
+
+  let userName = loadName();
+
 </script>
 
-{#if user_data}
-  {user_data.value}
-{:else if invalid_user}
-  N/A
-{:else}
+{#await userName}
   <i>loading...</i>
-{/if}
+{:then n}
+  {n}
+{/await}

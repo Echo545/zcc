@@ -17,15 +17,29 @@ var requestOptions = {
 };
 
 
-export async function LoadComments(url)
+export async function LoadComments(ticket_id)
 {
+
+  let url = `https://zcccodingchallenge54.zendesk.com/api/v2/tickets/${ticket_id}/comments`;
+  let comments = [];
+
   try {
     let response = await fetch(url, requestOptions);
     let result = await response.json();
+    let comment_count = result.count;
+    let all_comments = result.comments;
+
+    // If there are comments beyond the original post
+    if (comment_count > 1) {
+      comments = all_comments;
+      comments.shift();
+    }
 
   } catch (error) {
-
+    console.log(error);
   }
+
+  return comments;
 }
 
 
