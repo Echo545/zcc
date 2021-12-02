@@ -1,5 +1,4 @@
-import auth from "../Auth.js";
-
+import { token, domain } from "../Auth.js";
 import { global_tickets } from "./stores.js";
 import { has_more } from "./stores.js";
 import { prev_page_url } from "./stores.js";
@@ -7,9 +6,12 @@ import { next_page_url } from "./stores.js";
 import { ticket_count } from "./stores.js";
 import { load_error } from "./stores.js";
 
-var headers = new Headers();
-headers.append("Authorization", "Bearer " + auth.token);
 
+// Build headers for request
+var headers = new Headers();
+headers.append("Authorization", "Bearer " + token);
+
+// Set request options
 var requestOptions = {
   method: "GET",
   headers: headers,
@@ -17,21 +19,29 @@ var requestOptions = {
 };
 
 
+/**
+ * Requests all the comments for a given ticket.
+ *
+ * @param {int} ticket_id The ID of the ticket
+ * @returns All the comments for a ticket aside from the original description
+ */
 export async function LoadComments(ticket_id)
 {
 
-  let url = `https://zcccodingchallenge54.zendesk.com/api/v2/tickets/${ticket_id}/comments`;
+  const URL = `${domain}/api/v2/tickets/${ticket_id}/comments`;
   let comments = [];
 
   try {
-    let response = await fetch(url, requestOptions);
+    let response = await fetch(URL, requestOptions);
     let result = await response.json();
     let comment_count = result.count;
     let all_comments = result.comments;
 
-    // If there are comments beyond the original post
+    // If there are comments beyond the original message
     if (comment_count > 1) {
       comments = all_comments;
+
+      // Get all comments except the original message
       comments.shift();
     }
 
@@ -43,10 +53,14 @@ export async function LoadComments(ticket_id)
 }
 
 
+/**
+ * Requests the tickets for a given page and stores them.
+ *
+ * @param {String} url The url to request tickets from
+ */
 export async function LoadTickets(url)
 {
-  let count_url =
-    "https://zcccodingchallenge54.zendesk.com/api/v2/tickets/count";
+  let count_url = `${domain}/api/v2/tickets/count`;
 
   try {
     // Make tickets request

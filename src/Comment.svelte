@@ -1,13 +1,15 @@
 <script>
   import Username from "./Username.svelte";
 
-  //   Class to add styling if comment is internal
-  $: privateStatus = public_comment ? "" : "comment-body-private";
-
   export let author_id;
   export let plain_body;
   export let public_comment;
   export let created_at;
+
+
+  //   Class to add styling if comment is internal
+  $: privateStatus = public_comment ? "" : "comment-body-private";
+
 </script>
 
 <div class="comment">
@@ -21,7 +23,7 @@
     {/if}
   </h5>
   <div class="comment-body {privateStatus}">
-    <h6>{created_at}</h6>
+    <h6>{new Date(created_at).toString().split("GMT")[0]}</h6>
     <p>
       {plain_body}
     </p>

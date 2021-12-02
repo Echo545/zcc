@@ -1,74 +1,76 @@
 <script>
-  import { current_ticket } from "./stores.js";
-  import { global_tickets } from "./stores.js";
-  import { next_page_url } from "./stores";
-  import { prev_page_url } from "./stores";
-  import { has_more } from "./stores";
-  import { ticket_count } from "./stores.js";
-  import { load_error } from "./stores";
-
-  import { LoadTickets } from "./Requests.js";
-
   import ListEntry from "./ListEntry.svelte";
   import TicketModal from "./TicketModal.svelte";
+  import { domain } from "../Auth";
+  import { LoadTickets } from "./Requests.js";
+
+  import { global_tickets } from "./stores.js";
+  import { has_more } from "./stores.js";
+  import { prev_page_url } from "./stores.js";
+  import { next_page_url } from "./stores.js";
+  import { ticket_count } from "./stores.js";
+  import { load_error } from "./stores.js";
+  import { current_ticket } from "./stores.js";
 
   const PAGE_COUNT = 25;
+  const TICKETS_URL = `${domain}/api/v2/tickets?page[size]=${PAGE_COUNT}`;
 
-  // lowerBound += page_count with each page turn forward
+  // bounds to aid page display
   $: lowerBound = 1;
   $: upperBound = PAGE_COUNT;
-
-  //   current_page += 1 with every page turn forward and -= 1 for each backwards
-  let current_page = 0;
-  let tickets_url = `https://zcccodingchallenge54.zendesk.com/api/v2/tickets?page[size]=${PAGE_COUNT}`;
-
-  export let key;
-
   let backButtonStatus = "disabled";
   let forwardButtonStatus = "";
+  let current_page = 0;
 
-  var headers = new Headers();
-  headers.append("Authorization", "Bearer " + key);
+  //   Promise for loading tickets from API
+  let loading = LoadTickets(TICKETS_URL);
 
-  let loading = LoadTickets(tickets_url);
 
+  /**
+   * Updates next and previous button states and updates display counts.
+   */
   function checkPage() {
-
-
     if ($has_more) {
       forwardButtonStatus = "enabled";
     } else {
-		forwardButtonStatus = "disabled";
+      forwardButtonStatus = "disabled";
     }
 
     if (current_page > 0) {
-		backButtonStatus = "enabled";
+      backButtonStatus = "enabled";
     } else {
-		backButtonStatus = "disabled";
+      backButtonStatus = "disabled";
     }
 
-	// Calculate bounds for display
-	lowerBound = PAGE_COUNT * current_page + 1;
-	upperBound = lowerBound + PAGE_COUNT;
+    // Calculate bounds for display
+    lowerBound = PAGE_COUNT * current_page + 1;
+    upperBound = lowerBound + PAGE_COUNT;
 
-	if (upperBound > PAGE_COUNT) {
-		upperBound -= $ticket_count % PAGE_COUNT;
-	}
-	if (upperBound > $ticket_count) {
-		upperBound = $ticket_count;
-	}
-
+    // Check for out of bounds
+    if (upperBound > PAGE_COUNT) {
+      upperBound -= $ticket_count % PAGE_COUNT;
+    }
+    if (upperBound > $ticket_count) {
+      upperBound = $ticket_count;
+    }
   }
 
+
+  /**
+   * Loads tickets for the previous page if it exists
+   */
   function prevPage() {
     if (current_page > 0) {
       current_page -= 1;
       loading = LoadTickets($prev_page_url);
     }
-
     checkPage();
   }
 
+
+  /**
+   * Load tickets for the next page if there are more tickets
+   */
   function nextPage() {
     if ($has_more) {
       current_page += 1;
@@ -78,6 +80,7 @@
     checkPage();
   }
 
+  // check page for initial page load
   checkPage();
 </script>
 
@@ -103,8 +106,8 @@
           </div>
           {#if !$load_error}
             {#await loading}
-              Loading, please wait...
-            {:then loaded}
+              <p class="transistion-message">Loading, please wait...</p>
+            {:then}
               <div class="card-body">
                 <div
                   class="table-responsive table mt-2"
@@ -216,7 +219,7 @@
               </div>
             {/await}
           {:else}
-            <h4 id="error-message">
+            <h4 class="transistion-message">
               Sorry, the API is currently unavailable
               <p>See the console for a detailed error message.</p>
             </h4>
@@ -243,9 +246,10 @@
     font-weight: 100;
   }
 
-  #error-message {
+  .transistion-message {
     margin-top: 5%;
     padding-bottom: 5%;
     text-align: center;
+    font-size: large;
   }
 </style>

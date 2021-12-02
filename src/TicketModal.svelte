@@ -1,14 +1,14 @@
 <script>
   import { current_ticket } from "./stores.js";
   import { LoadComments } from "./Requests";
+  import Username from "./Username.svelte";
+  import Comment from "./Comment.svelte";
 
   import IconOpen from "./IconOpen.svelte";
   import IconPending from "./IconPending.svelte";
   import IconSolved from "./IconSolved.svelte";
   import IconClosed from "./IconClosed.svelte";
   import IconNew from "./IconNew.svelte";
-  import Username from "./Username.svelte";
-  import Comment from "./Comment.svelte";
 
   $: id = $current_ticket.id;
   $: subject = $current_ticket.subject;
@@ -78,6 +78,7 @@
                   </p>
                 </div>
                 <div class="col" id="meta-col">
+                  <!-- Ticket Details -->
                   <div class="ticket-details">
                     <p>
                       <b>Submitter:</b>
@@ -89,27 +90,35 @@
                       <Username requester_id={assignee_id} />
                     </p>
 
+                    <!-- Load followers -->
                     <p>
                       <b>Followers:</b>
                       {#if follower_ids}
                         {#each follower_ids as f_id}
-                          <Username {f_id} />,
+                          <Username requester_id={f_id} />
                         {/each}
                       {/if}
                     </p>
 
+                    <!-- Load tags -->
                     <p>
                       <b>Tags:</b>
                       {#if tags}
                         {#each tags as tag}
-                          {tag},
+                          <span class="tag"> {tag} </span>
                         {/each}
                       {/if}
                     </p>
 
-                    <!-- TODO: make these dates readable -->
-                    <p><b>Created:</b> {created_at}</p>
-                    <p><b>Updated:</b> {updated_at}</p>
+                    <!-- Dates -->
+                    <p>
+                      <b>Created:</b>
+                      {new Date(created_at).toString().split("GMT")[0]}
+                    </p>
+                    <p>
+                      <b>Updated:</b>
+                      {new Date(updated_at).toString().split("GMT")[0]}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -117,14 +126,12 @@
             <h5>Comments</h5>
             <hr class="comment-hr" />
             <div id="comment-organizer">
-
-            <!-- Load comments for ticket -->
+              <!-- Load comments for ticket -->
               {#await comments_promise}
-                <i>Loading...</i>
+                <i class="transistion-message">Loading Comments...</i>
               {:then comments}
                 {#if comments}
-
-                <!-- If there's more than one comment, display each -->
+                  <!-- If there's more than one comment, display each -->
                   {#if Array.isArray(comments)}
                     {#each comments as comment}
                       <Comment
@@ -153,3 +160,18 @@
     </div>
   </div>
 {/if}
+
+<style>
+  .transistion-message {
+    margin-top: 5%;
+    text-align: center;
+    font-size: large;
+  }
+
+  .tag {
+    margin-left: 1.5%;
+    padding-left: 0.7%;
+    padding-right: 0.7%;
+    background-color: rgba(211, 211, 211, 0.438);
+  }
+</style>
