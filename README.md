@@ -6,6 +6,13 @@ This is a lightweight ticket viewer created for the Zendesk internship coding ch
 
 Built using Svelte and Bootstrap 5.
 
+## Project Structure
+`/src/`: Contains unit tests, source code, and Svelte props
+
+`/public/`: Contains HTML and CSS assets
+
+`/Auth.js`: Contains API authentication information
+
 <br>
 
 ## Setup
