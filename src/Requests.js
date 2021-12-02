@@ -5,18 +5,58 @@ import { prev_page_url } from "./stores.js";
 import { next_page_url } from "./stores.js";
 import { ticket_count } from "./stores.js";
 import { load_error } from "./stores.js";
-
+import { names_cache } from "./stores.js";
 
 // Build headers for request
-var headers = new Headers();
+let headers = new Headers();
 headers.append("Authorization", "Bearer " + token);
 
 // Set request options
-var requestOptions = {
+let requestOptions = {
   method: "GET",
   headers: headers,
   redirect: "follow",
 };
+
+
+
+/**
+ * Finds the user's name using their id.
+ *
+ * @return the user's name as a string, or null if it doesn't exist.
+ */
+export async function loadName(requester_id)
+{
+  const USER_URL = `${domain}/api/v2/users/${requester_id}`;
+  let cache;
+
+  // Subscribe to names_cache
+  names_cache.subscribe(m => {
+    cache = m;
+  });
+
+  // Attempt to load name from cache first
+  let name = cache.get(requester_id);
+
+  try {
+    if (!name) {
+      const response = await fetch(USER_URL, requestOptions);
+      let result = await response.json();
+
+      name = result.user.name;
+
+      // Cache name to reduce future API calls
+      cache.set(requester_id, name);
+      names_cache.set(cache);
+    }
+  } catch (error) {
+    console.log(error);
+    name = null;
+  }
+
+  return name;
+}
+
 
 
 /**

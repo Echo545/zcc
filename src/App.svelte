@@ -25,7 +25,6 @@
   //   Promise for loading tickets from API
   let loading = LoadTickets(TICKETS_URL);
 
-
   /**
    * Updates next and previous button states and updates display counts.
    */
@@ -44,7 +43,7 @@
 
     // Calculate bounds for display
     lowerBound = PAGE_COUNT * current_page + 1;
-    upperBound = lowerBound + PAGE_COUNT;
+    upperBound = PAGE_COUNT + lowerBound;
 
     // Check for out of bounds
     if (upperBound > PAGE_COUNT) {

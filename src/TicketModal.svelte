@@ -3,13 +3,10 @@
   import { LoadComments } from "./Requests";
   import Username from "./Username.svelte";
   import Comment from "./Comment.svelte";
+  import Icon from "./Icon.svelte";
 
-  import IconOpen from "./IconOpen.svelte";
-  import IconPending from "./IconPending.svelte";
-  import IconSolved from "./IconSolved.svelte";
-  import IconClosed from "./IconClosed.svelte";
-  import IconNew from "./IconNew.svelte";
 
+//   Get needed values from current ticket
   $: id = $current_ticket.id;
   $: subject = $current_ticket.subject;
   $: requester_id = $current_ticket.requester_id;
@@ -23,9 +20,11 @@
   $: assignee_id = $current_ticket.assignee_id;
   $: submitter_id = $current_ticket.submitter_id;
 
+//   Load comments for current ticket
   $: comments_promise = LoadComments(id);
 </script>
 
+<!-- Ensure there is a ticket before attempting to load -->
 {#if $current_ticket}
   <div class="modal fade" role="dialog" tabindex="-1" id="ticket-modal">
     <div
@@ -37,20 +36,12 @@
         <div class="modal-header">
           <h3 class="modal-title">
             <!-- Display the ticket's icon -->
-            {#if status == "open"}
-              <IconOpen />
-            {:else if status == "solved"}
-              <IconSolved />
-            {:else if status == "pending"}
-              <IconPending />
-            {:else if status == "new"}
-              <IconNew />
-            {:else}
-              <IconClosed />
-            {/if}
+            <Icon {status}/>
+
             #{id}: {subject}
           </h3>
 
+          <!-- Priority Label shows if a priority is given-->
           {#if priority}
             <span class="font-monospace" id="priority">
               {priority}
@@ -95,7 +86,7 @@
                       <b>Followers:</b>
                       {#if follower_ids}
                         {#each follower_ids as f_id}
-                          <Username requester_id={f_id} />
+                          <span class="follower"> <Username requester_id={f_id} /> </span>
                         {/each}
                       {/if}
                     </p>
@@ -123,14 +114,17 @@
                 </div>
               </div>
             </div>
+
             <h5>Comments</h5>
             <hr class="comment-hr" />
             <div id="comment-organizer">
+
               <!-- Load comments for ticket -->
               {#await comments_promise}
                 <i class="transistion-message">Loading Comments...</i>
               {:then comments}
                 {#if comments}
+
                   <!-- If there's more than one comment, display each -->
                   {#if Array.isArray(comments)}
                     {#each comments as comment}
@@ -173,5 +167,12 @@
     padding-left: 0.7%;
     padding-right: 0.7%;
     background-color: rgba(211, 211, 211, 0.438);
+  }
+
+  .follower {
+    margin-left: 1.5%;
+    padding-left: 0.7%;
+    padding-right: 0.7%;
+    background-color: rgba(100, 193, 255, 0.15);
   }
 </style>
