@@ -116,7 +116,7 @@
                   <table class="table my-0" id="dataTable">
                     <thead>
                       <tr>
-                        <th>Status</th>
+                        <th data-testid="status">Status</th>
                         <th>Subject</th>
                         <th>Requester</th>
                         <th>Requested</th>
@@ -177,7 +177,7 @@
                     class="col-2 d-flex justify-content-center align-items-center"
                   >
                     <p class="text-secondary">
-                      Displaying {lowerBound}-{upperBound} of
+                      Displaying <span data-testid="lower-bound">{lowerBound}</span>>-{upperBound} of
 
                       <!-- Total number of tickets -->
                       {#if $ticket_count}
@@ -191,6 +191,7 @@
                     class="col-4 d-flex justify-content-start align-items-center"
                   >
                     <button
+                    data-testid="button-next"
                       class="btn btn-primary"
                       type="button"
                       {forwardButtonStatus}
@@ -220,7 +221,7 @@
             <h4 class="transistion-message">
               Sorry, the API is currently unavailable
               <p>See the console for a detailed error message.</p>
-              <p>{$load_error}</p>
+              <p>Ensure your domain is in format <i>https://example.zendesk.com</i> and that your OAuth token is correct</p>
             </h4>
           {/if}
         </div>
