@@ -7,17 +7,17 @@ import { ticket_count } from "./stores.js";
 import { load_error } from "./stores.js";
 import { names_cache } from "./stores.js";
 
+
 // Build headers for request
-let headers = new Headers();
-headers.append("Authorization", "Bearer " + token);
+let authorization = `Bearer ${token}`;
 
 // Set request options
 let requestOptions = {
   method: "GET",
-  headers: headers,
+  headers: {
+    'Authorization': authorization},
   redirect: "follow",
 };
-
 
 
 /**

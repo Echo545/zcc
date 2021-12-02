@@ -3,7 +3,6 @@
   import TicketModal from "./TicketModal.svelte";
   import { domain } from "../Auth";
   import { LoadTickets } from "./Requests.js";
-
   import { global_tickets } from "./stores.js";
   import { has_more } from "./stores.js";
   import { prev_page_url } from "./stores.js";
@@ -182,9 +181,9 @@
 
                       <!-- Total number of tickets -->
                       {#if $ticket_count}
-                        {$ticket_count}
+                        <span id="total-ticket-count">{$ticket_count}</span>
                       {:else}
-                        <i>loading...</i>
+                        <i id="total-ticket-loading">loading...</i>
                       {/if}
                     </p>
                   </div>
@@ -221,6 +220,7 @@
             <h4 class="transistion-message">
               Sorry, the API is currently unavailable
               <p>See the console for a detailed error message.</p>
+              <p>{$load_error}</p>
             </h4>
           {/if}
         </div>

@@ -6,16 +6,19 @@
     "build": "rollup -c",
     "dev": "rollup -c -w",
     "start": "sirv public --no-clear",
-    "test": "jest"
+    "test": "jest src",
+    "test:watch": "npm run test -- --watch --verbose true"
   },
   "devDependencies": {
     "@babel/core": "^7.16.0",
     "@babel/preset-env": "^7.16.4",
     "@rollup/plugin-commonjs": "^17.0.0",
     "@rollup/plugin-node-resolve": "^11.0.0",
+    "@testing-library/jest-dom": "^5.15.1",
     "@testing-library/svelte": "^3.0.3",
     "babel-jest": "^27.4.2",
     "jest": "^27.4.3",
+    "jest-fetch-mock": "^3.0.3",
     "rollup": "^2.3.4",
     "rollup-plugin-css-only": "^3.1.0",
     "rollup-plugin-livereload": "^2.0.0",
@@ -25,6 +28,20 @@
     "svelte-jester": "^2.1.5"
   },
   "dependencies": {
+    "isomorphic-fetch": "^3.0.0",
     "sirv-cli": "^1.0.0"
+  },
+  "jest": {
+    "setupFilesAfterEnv": [
+      "@testing-library/jest-dom/extend-expect"
+    ],
+    "transform": {
+      "^.+\\.js$": "babel-jest",
+      "^.+\\.svelte$": "svelte-jester"
+    },
+    "moduleFileExtensions": [
+      "js",
+      "svelte"
+    ]
   }
 }
