@@ -25,14 +25,14 @@ npm install
 ```
 
 ### Authentication
-Replace `{YOUR_DOMAIN}` in `Auth.js` with the your ZenDesk domain, ie `https://example.zendesk.com`
+Replace `{YOUR_DOMAIN}` in `Auth.js` with the your Zendesk domain, ie `https://example.zendesk.com`
 
 Replace `{YOUR_TOKEN}` in `Auth.js` with your OAuth token.
 
 <br>
 
 ## Usage
-Run development enviroment with
+Run development environment with
 ```
 npm run dev
 ```
@@ -41,14 +41,14 @@ Or build to production using
 npm run build
 ```
 
-The Ticket Viewer will load all tickets for your account in pages of 25 tickets at a time. Naviage between the pages with the buttons below the table.
+The Ticket Viewer will load all tickets for your account in pages of 25 tickets at a time. Navigate between the pages with the buttons below the table.
 
 <br>
 
 ## Testing
 
 
-Unit tests are located in ```App.spec.js``` and are written using Testing Library with the Svelte Testing Framework.
+Unit tests are in ```/src/App.spec.js``` and are written using Testing Library with the Svelte Testing Framework.
 
 
 Run unit tests using
