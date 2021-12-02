@@ -177,7 +177,7 @@
                     class="col-2 d-flex justify-content-center align-items-center"
                   >
                     <p class="text-secondary">
-                      Displaying <span data-testid="lower-bound">{lowerBound}</span>>-{upperBound} of
+                      Displaying <span data-testid="lower-bound">{lowerBound}</span>-{upperBound} of
 
                       <!-- Total number of tickets -->
                       {#if $ticket_count}
